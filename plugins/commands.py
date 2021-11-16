@@ -52,6 +52,8 @@ from pyrogram import (
 IST = pytz.timezone(Config.TIME_ZONE)
 if Config.DATABASE_URI:
     from utils import db
+from time import time
+from datetime import datetime    
 
 HOME_TEXT = "<b>Hey  [{}](tg://user?id={}) 🙋‍♂️\n\nIam A Bot Built To Play or Stream Videos In Telegram VoiceChats.\nI Can Stream Any YouTube Video Or A Telegram File Or Even A YouTube Live.</b>"
 admin_filter=filters.create(is_admin) 
@@ -381,4 +383,55 @@ async def set_heroku_var(client, message):
 
 
 
+#ping cmd 
+@Client.on_message(filters.command(['ping', f"ping@{Config.BOT_USERNAME}"]))
+async def ping_pong(Client, message):
+    await message.reply_chat_action("typing")
+    start = time()
+    m_reply = await message.reply_text("checking ping...")
+    delta_ping = time() - start
+    await m_reply.edit_text(
+        "🏓 `PONG!!`\n"
+        f"⚡️ `{delta_ping * 1000:.3f} ms`\n\n"
+        f"💖 ** @nikitaroy_31**"
+    )
+#uptime cmd
+@Client.on_message(filters.command(['uptime', f"uptime@{Config.BOT_USERNAME}"]))
+async def get_uptime(Client, message):
+    await message.reply_chat_action("typing")
+    current_time = datetime.utcnow()
+    uptime_sec = (current_time - START_TIME).total_seconds()
+    uptime = await _human_time_duration(int(uptime_sec))
+    await message.reply_text(
+        "🤖 Bot status:\n"
+        f"• **Uptime:** `{uptime}`\n"
+        f"• **Start time:** `{START_TIME_ISO}`\n\n"
+        f"💖 ** @nikitaroy_31**"
+
+    
+    )   
+
+    
+
+
+
+START_TIME = datetime.utcnow()
+START_TIME_ISO = START_TIME.replace(microsecond=0).isoformat()
+TIME_DURATION_UNITS = (
+    ('week', 60 * 60 * 24 * 7),
+    ('day', 60 * 60 * 24),
+    ('hour', 60 * 60),
+    ('min', 60),
+    ('sec', 1)
+)
+async def _human_time_duration(seconds):
+    if seconds == 0:
+        return 'inf'
+    parts = []
+    for unit, div in TIME_DURATION_UNITS:
+        amount, seconds = divmod(int(seconds), div)
+        if amount > 0:
+            parts.append('{} {}{}'
+                         .format(amount, unit, "" if amount == 1 else "s"))
+    return ', '.join(parts)
 
